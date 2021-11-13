@@ -1,0 +1,86 @@
+#!/bin/bash
+
+#PBS -P <Project>
+#PBS -N Align
+#PBS -l select=1:ncpus=16:mem=80GB
+#PBS -l walltime=30:00:00
+#PBS -M <your email>@sydney.edu.au
+#PBS -m e
+#PBS -q defaultQ
+#PBS -o ./Logs/alignment_index.o
+#PBS -e ./Logs/alignment_index.e
+#PBS -J 
+
+# edit PBS variables for projectID, your email address, number of jobs to be run in parallel (number of fastq files in your config file).
+
+# To run qsub align.pbs
+# To run one sample only, hash out #PBS -J, fill in number of sample in config below to be run and unhash
+## PBS_ARRAY_INDEX=1
+
+# edit these to match your project (specify full path)
+Project=
+config=/project/${Project}/Scripts/Configs/<cofig_name_here>.config
+ref=/project/${Project}/Reference/<ref>.fasta # fasta format 
+
+#### DON'T EDIT BELOW THIS LINE ####
+
+module load samtools/1.10
+module load bwa/0.7.17
+module load gatk/4.2.1.0
+module load samblaster/0.1.24
+
+breed=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $3}' $config)
+sample=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
+platform=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $4}' $config)
+seq_centre=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $5}' $config)
+bams=/scratch/${Project}/Bams # where do you want your bams stored
+fastq=/scratch/${Project}/Fastq # where are the fastqs stored
+library=1
+to_merge=''
+cat_disc=''
+cat_split=''
+fq_pair=''
+
+rm -r ../Logs/alignment.e ../Logs/alignment.o ../Logs/alignment.o_usage
+
+# For each fastq pair align to reference with bwa-mem
+for fqpair in $(ls ${fastq}/*fastq.gz |sed 's/R1*\|R2*//' | uniq | cut -d '/' -f 5 | sed 's/\_$//' | cut -d '_' -f 1) ###This syntax may need to be edited before running
+do
+
+    fq1=$(ls ${fastq}/${fqpair}*R1*fastq.gz)
+    fq2=$(ls ${fastq}/${fqpair}*R2*fastq.gz)
+    #use truncated fastq file name as ID
+    #get platform unit from read ID
+    flowcell=$(zcat $fq1 | head -1 | cut -d ':' -f 3) #assumes flowcell ID is field 3 of ':' delim read ID
+    lane=$(zcat $fq1 | head -1 | cut -d ':' -f 4) #assumes flowcell lane number is field 4 of ':' delim read ID
+
+# unhash and use to test you're capturing the correct before running alignment
+#echo fq1:$fq1
+#echo fq2:$fq2
+#echo flowcell:$flowcell
+#echo lane:$lane
+
+# Align and pull out discordant and split reads
+bwa mem -M -t $NCPUS $ref \
+        -R "@RG\tID:${flowcell}.${lane}_${fqpair}_${library}\tPL:${platform}\tPU:${flowcell}.${lane}\tSM:${sample}\tLB:${breed}_${fqpair}_${library}\tCN:${seq_centre}" \
+        $fq1 $fq2  \
+        | samblaster -M -e --addMateTags \
+        -d ${bams}/${fqpair}.disc.sam \
+        -s ${bams}/${fqpair}.split.sam \
+        | samtools view -bSho ${bams}/${fqpair}.dedup.bam
+
+done
+
+# sort bams by coordinates
+samtools view -@ 12 -h ${bams}/${sample}.dedup.bam \
+        | samtools sort -@ ${NCPUS} -T ${bams}/temp -m 4G -o ${bams}/${sample}.dedup.sorted.bam -
+
+# Error check with samtools
+if ! samtools quickcheck ${bams}/${sample}.dedup.sorted.bam
+        then
+        printf "corrupted or missing ${bams}/${sample}.dedup.sorted.bam"
+
+fi
+
+# Index with samtools
+samtools index -b ${bams}/${sample}.dedup.sorted.bam ${bams}/${sample}.dedup.sorted.bai
