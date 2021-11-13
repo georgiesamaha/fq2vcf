@@ -165,11 +165,11 @@ qsub bamstats.pbs
   
  
 ## Resources 
-[Artemis user guide](https://sydneyuni.atlassian.net/wiki/spaces/RC/pages/185827329/Artemis+User+Guide) 
-[Artemis job queues](https://sydneyuni.atlassian.net/wiki/spaces/RC/pages/220988168/Queue+resource+limits)
-[GATK bqsr](https://gatk.broadinstitute.org/hc/en-us/articles/360035890531-Base-Quality-Score-Recalibration-BQSR-) 
-[GATK parallelism](https://gatk.broadinstitute.org/hc/en-us/articles/360035532012-Parallelism-Multithreading-Scatter-Gather) 
-[VCF file format](https://samtools.github.io/hts-specs/VCFv4.2.pdf) 
-[SAM/BAM file format](https://samtools.github.io/hts-specs/SAMv1.pdf) 
-[Fastq file format](https://sapac.support.illumina.com/bulletins/2016/04/fastq-files-explained.html)
+[Artemis user guide](https://sydneyuni.atlassian.net/wiki/spaces/RC/pages/185827329/Artemis+User+Guide)   
+[Artemis job queues](https://sydneyuni.atlassian.net/wiki/spaces/RC/pages/220988168/Queue+resource+limits)  
+[GATK bqsr](https://gatk.broadinstitute.org/hc/en-us/articles/360035890531-Base-Quality-Score-Recalibration-BQSR-)   
+[GATK parallelism](https://gatk.broadinstitute.org/hc/en-us/articles/360035532012-Parallelism-Multithreading-Scatter-Gather)   
+[VCF file format](https://samtools.github.io/hts-specs/VCFv4.2.pdf)   
+[SAM/BAM file format](https://samtools.github.io/hts-specs/SAMv1.pdf)   
+[Fastq file format](https://sapac.support.illumina.com/bulletins/2016/04/fastq-files-explained.html)  
   
