@@ -11,7 +11,7 @@
 #PBS -e ./Logs/alignment_index.e
 #PBS -J 
 
-# edit PBS variables for projectID, your email address, number of jobs to be run in parallel (number of fastq files in your config file).
+# edit PBS variables for projectID, your email address, number of jobs to be run in parallel (number of samples in your config file).
 
 # To run qsub align.pbs
 # To run one sample only, hash out #PBS -J, fill in number of sample in config below to be run and unhash
