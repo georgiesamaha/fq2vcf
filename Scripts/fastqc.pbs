@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#PBS -P <Project>
+#PBS -N fastQC
+#PBS -l select=1:ncpus=1:mem=20GB
+#PBS -l walltime=03:00:00
+#PBS -m e
+#PBS -M <youremail>@sydney.edu.au
+#PBS -q defaultQ
+#PBS -W umask=022
+#PBS -e ./Logs/fastqc.e
+#PBS -o ./Logs/fastqc.o
+#PBS -J 1-6
+
+# edit PBS variables for projectID, your email address, number of jobs to be run in parallel (number of fastq files in your config file).  
+
+# to run: qsub fastqc.pbs
+
+# edit these to match your project
+io=/scratch/${Project}/Fastq
+config=/project/${Project}/Scripts/Configs/fastqc.config #list of fastq files
+
+#### DON'T EDIT BELOW THIS LINE ####
+
+fastq=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
+sample=`echo ${fastq} | cut -d '_' -f 1`
+fq=${io}/${fastq}
+out=${io}/FastQC/${sample}
+logfile=/project/${Project}/Scripts/Logs/FastQC/${fastq}
+
+mkdir -p ${io}/FastQC
+mkdir -p /project/${Project}/Scripts/Logs/FastQC
+
+NCPUS=1
+
+module load fastqc/0.11.8
+
+fastqc -t ${NCPUS} --extract -o ${out} ${fq} >> ${logfile} 2>&1
