@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#PBS -P <Project>
+#PBS -N Index_ref
+#PBS -l select=1:ncpus=1:mem=32GB
+#PBS -l walltime=03:00:00
+#PBS -m e
+#PBS -M <your_email>@sydney.edu.au
+#PBS -q defaultQ
+#PBS -W umask=022
+#PBS -e ./Logs/indexref.e
+#PBS -o ./Logs/indexref.o
+
+# edit PBS variables for projectID, your email address.
+
+module load bwa/0.7.17
+module load samtools/1.10
+module load gatk/4.2.1.0
+
+Project=
+io=/project/${Project}/Reference
+ref=${io}/felCat9.0
+
+#bwa index -a bwtsw ${ref}.fasta
+
+#samtools faidx ${ref}.fasta
+
+#gatk CreateSequenceDictionary -R ${ref}.fasta -O ${ref}.dict
+
+gatk IndexFeatureFile -I ${io}/felis_catus.vcf.gz
