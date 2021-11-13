@@ -7,8 +7,8 @@
 #PBS -M <your email>@sydney.edu.au
 #PBS -m e
 #PBS -q defaultQ
-#PBS -o ./Logs/alignment_index.o
-#PBS -e ./Logs/alignment_index.e
+#PBS -o ./Logs/alignment.o
+#PBS -e ./Logs/alignment.e
 #PBS -J 
 
 # edit PBS variables for projectID, your email address, number of jobs to be run in parallel (number of samples in your config file).
