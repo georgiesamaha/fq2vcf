@@ -11,5 +11,5 @@ fastq=/scratch/${Project}/Fastq
 
 singularity exec -B ${fastq}:$HOME \
         /project/${Project}/Apps/multiqc_1.9--py_1.sif \
-        multiqc . ----filename ${Project}_multiqc_fastqc \
+        multiqc . --filename ${Project}_multiqc_fastqc \
         -o ${fastq}
