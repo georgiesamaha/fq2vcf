@@ -17,6 +17,7 @@
 # to run: qsub fastqc.pbs
 
 # edit these to match your project
+Project=
 io=/scratch/${Project}/Fastq
 config=/project/${Project}/Scripts/Configs/fastqc.config #list of fastq files
 
