@@ -1,6 +1,6 @@
-# fq2vcf   WORK IN PROGRESS... 
+# fq2vcf  @ USyd Artemis  
 
-This repo contains bash scripts for fastq to vcf pipeline, written for USyd Artemis HPC. This pipeline follows GATK/BROAD best practice recommendations for alignment and germline variant calling. Workflow requires users to download and prepare reference assembly and then run a series of scripts to align raw reads to the reference assembly, perform base quality score recalibration and perform variant calling with GATK. These scripts have not been optimised for speed and are run as a vanilla implementation.  
+This repo contains bash scripts for fastq to vcf pipeline, written for USyd Artemis HPC. This pipeline follows GATK/BROAD best practice recommendations for alignment and germline variant calling. Workflow requires users to download and prepare reference assembly and then run a series of scripts to align raw reads to the reference assembly, perform base quality score recalibration and perform variant calling with GATK. These scripts have not been optimised and are run as a vanilla implementation.  
 
 Instructions on how to install this repo, prepare, and run scripts follow below. 
 
@@ -156,16 +156,36 @@ Collect summary metrics for final.bam files with [Samtools flagstat](http://www.
 qsub bamstats.pbs
 ```
   
-Flagstat summaries and MultiQC aggregate reports are output to `/scratch/<Project>/Bams`   
-  
+Flagstat summaries and MultiQC aggregate reports are output to `/scratch/<Project>/Bams`     
   
 ### 8. Call variants with GATK's HaplotypeCaller 
 
+Run GATK's [HaplotypeCaller tool](https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller) for sample level variant calling across sample (NB will rewrite to parallelise across each chromosome in the future). HaplotypeCaller is capable of calling SNPs and indels simultaneously, can handle non-diploid and pooled experimental data. Edit the relevant variables in the script and run with:   
+
+  
+```
+qsub callvariants.pbs
+```
+
+A g.vcf.gz file will be produced for each sample. They will be output to `/scratch/<Project>/VCFs`  
+  
 ### 9. Joint call variants 
+
+This step performs joint genotyping on one or more samples pre-called with HaplotypeCaller, using GATK's CombineGVCFs and GenotypeGVCFs tools. Edit the relevant variables in the script and run with:  
+
+```
+qsub jointcallvariants.pbs
+```
+
+A cohort vcf.gz file will be output to `/scratch/<Project>/VCFs`  
 
 ### 10. Collect VCF summary stats 
   
-## Notes  
+Filtering or variant quality score recalibration of the final VCF is recommended to filter out false positive variants. Run the following scripts to annotate variants with generic filtering thresholds and summarise variant outputs with: 
+ 
+```
+qsub filter_summarise_vcf.pbs
+```  
   
  
 ## Resources 
