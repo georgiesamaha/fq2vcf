@@ -153,7 +153,7 @@ Indexed final.bam files are output to `/scratch/<Project>/Bams`
 Collect summary metrics for final.bam files with [Samtools flagstat](http://www.htslib.org/doc/samtools-flagstat.html). This step also includes running multiQC to create an aggregate report for all final.bam files. If you do not want to run MultiQC, hash out the singularity-multiqc command in the script. Edit relevant variables in the script and run script with: 
 
 ```
-qsub bamstats.pbs
+qsub bamsummaries.pbs
 ```
   
 Flagstat summaries and MultiQC aggregate reports are output to `/scratch/<Project>/Bams`     
