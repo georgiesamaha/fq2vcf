@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#PBS -P <Project>
+#PBS -N gvcf
+#PBS -l select=1:ncpus=48:mem=80GB
+#PBS -l walltime=48:00:00
+#PBS -M georgina.samaha@sydney.edu.au
+#PBS -m e
+#PBS -q defaultQ
+#PBS -o ./Logs/gvcf.o
+#PBS -e ./Logs/gvcf.e
+#PBS -J 
+
+# run GATK haplotypecaller for sample level variant calling across each chromosome separately
+# Will rewrite in the future to run separate job for each chromosome to improve runtime
+
+# edit these to match your project (specify full path)
+Project=
+config=/project/${Project}/Scripts/Configs/<cohort>.config
+ref=/project/${Project}/Reference/<ref>.fasta
+known=/project/${Project}/Reference/<refvcf>.vcf.gz
+
+#### DON'T EDIT BELOW THIS LINE ####
+
+module load gatk/4.1.9.0
+
+sample=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
+bam=/scratch/${Project}/Bams/${sample}.final.bam
+VCFs=/scratch/${Project}/VCFs
+vcf=${VCFs}/${sample}.g.vcf.gz
+logdir=/project/${Project}/Scripts/Logs
+err_log=${logdir}/${sample}.err
+NCPUS=16
+
+rm -rf $err_log
+echo "sample is: $sample" > $err_log
+echo "bam is: $bam" >> $err_log
+
+gatk --java-options "-Xmx8g -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" \
+        HaplotypeCaller \
+        -R ${ref} \
+        -I ${bam} \
+        -O ${vcf} \
+        --dbsnp ${known} \
+        --pcr-indel-model NONE \
+        -G StandardAnnotation \
+        -G StandardHCAnnotation \
+        --native-pair-hmm-threads ${NCPUS} \
+        -ERC GVCF
