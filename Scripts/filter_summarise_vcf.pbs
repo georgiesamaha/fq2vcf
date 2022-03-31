@@ -1,0 +1,81 @@
+#!/bin/bash
+
+#PBS -P <Project>
+#PBS -N filtervcf
+#PBS -l select=1:ncpus=16:mem=80GB
+#PBS -l walltime=24:00:00
+#PBS -M <email>
+#PBS -m e
+#PBS -q defaultQ
+#PBS -o ./Logs/filter_vcf.o
+#PBS -e ./Logs/filter_vcf.e
+
+# run GATK VariantFiltration tool on cohort level VCF to perform hard-filtering
+# guide: https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants
+
+# edit these to match your project (specify full path)
+Project=
+cohort=
+
+module load gatk/4.1.9.0
+module load bcftools/1.14
+
+VCFs=/scratch/${Project}/VCFs
+mergedvcf=${VCFs}/${cohort}.vcf.gz
+vcf=${VCFs}/${sample}.g.vcf.gz
+logdir=/project/${Project}/Scripts/Logs
+errlog=${logdir}/${cohort}_varfiltering.err
+filtered=${VCFs}/${cohort}_filtered.vcf.gz
+snps=${VCFs}/${cohort}_filtered_SNP.vcf.gz
+indels=${VCFs}/${cohort}_filtered_INDEL.vcf.gz
+
+# Filter sites with excess heterozygous genotypes. Will only annotate 'FILTER' field, not remove any variants. Adjust filter expressions as necessary.  
+gatk --java-options "-Xmx42g -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" \
+       VariantFiltration \
+       -V ${mergedvcf} \
+       --filter-name "QD2" --filter-expression "QD < 2.0" \
+       --filter-name "QUAL20" --filter-expression "QUAL < 30.0" \
+       --filter-name "SOR3" --filter-expression "SOR > 3.0" \
+       --filter-name "FS60" --filter-expression "FS > 60.0" \
+       --filter-name "MQ40" --filter-expression "MQ < 40.0" \
+       --filter-name "MQRankSum-12.5" --filter-expression "MQRankSum < -12.5"\
+       --filter-name "ReadPosRankSum-8" --filter "ReadPosRankSum < -8.0" \
+       -O ${filtered} >${errlog} 2>&1
+
+# Create separate snp and indel vcfs. Hash out this command if unnecessary.
+bcftools view \
+        --threads 12 \
+        --types snps \
+        -Oz -o ${snps} \
+        ${filtered}
+
+bcftools view \
+        --threads 12 \
+        --types indels \
+        -Oz -o ${indels} \
+        ${filtered}
+
+# Evaluate final callsets with bcftools
+bcftools stats ${mergedvcf} >${VCFs}/${cohort}_total.stats
+
+plot-vcfstats -p ${VCFs}/${cohort}_total.stats \
+        ${VCFs}/${cohort}_total.vcfstats
+
+bcftools stats ${filtered} \
+        -c snps > ${VCFs}/${cohort}_filtered_snps.stats
+
+plot-vcfstats -p ${VCFs}/${cohort}_filtered_snps.stats \
+        ${VCFs}/${cohort}_snps.vcfstats
+
+bcftools stats ${filtered} \
+        -c indels > ${VCFs}/${cohort}_filtered_indels.stats
+
+plot-vcfstats -p ${VCFs}/${cohort}_filtered_indels.stats \
+        ${VCFs}/${cohort}_indels.vcfstats
+
+# Evaluate sample level variant stats
+bcftools plugin smpl-stats \
+                --output ${VCFs}/${cohort}_sample_stats \
+                ${VCFs}/${cohort}.vcf.gz
+
+
