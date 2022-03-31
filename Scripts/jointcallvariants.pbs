@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# perform joint calling with GATK's genotypeGVCFs
+
+#PBS -P <Project>
+#PBS -N genotypevcf
+#PBS -l select=1:ncpus=48:mem=80GB
+#PBS -l walltime=48:00:00
+#PBS -M <email>
+#PBS -m e
+#PBS -q defaultQ
+#PBS -o ./Logs/genotypevcf.o
+#PBS -e ./Logs/genotypevcf.e
+
+
+# Perform joint genotyping on one or more samples pre-called with HaplotypeCaller
+
+# edit these to match your project (specify full path)
+Project=
+cohort=
+config=/project/${Project}/Scripts/Configs/<cohort>.config
+ref=/project/${Project}/Reference/<ref>.fasta
+known=/project/${Project}/Reference/<refvcf>.vcf.gz
+
+
+VCFs=/scratch/${Project}/VCFs
+sample1=${VCFs}/FC300
+sample2=${VCFs}/FC327
+sample3=${VCFs}/USFC318
+
+#### DON'T EDIT BELOW THIS LINE ####
+
+sample=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
+gvcf=${VCFs}/${cohort}.g.vcf.gz
+vcf=${VCFs}/${cohort}.vcf.gz
+logdir=/project/${Project}/Scripts/Logs
+err_log=${logdir}/${sample}_genotypevcf.err
+
+module load gatk/4.1.9.0
+
+# collect all sample g.vcfs in /scratch/VCFs/ to make input for CombineGVCFs
+ls /scratch/${Project}/VCFs/*.g.vcf.gz > gvcf.list
+
+while read gvcf; do
+	echo -V "${gvcf} " >> ${args}
+done < gvcf.list
+
+# Create cohort gvcf
+gatk --java-options "-Xmx28g -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" \
+        CombineGVCFs \
+        -R ${ref} \
+        ${args} \
+        -O ${gvcf}
+
+# Genotype cohort vcf
+gatk --java-options "-Xmx28g -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" \
+        GenotypeGVCFs \
+        -R ${ref} \
+        -V ${gvcf} \
+        -O ${vcf}
