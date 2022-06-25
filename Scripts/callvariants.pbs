@@ -20,8 +20,6 @@ config=/project/${Project}/Scripts/Configs/<cohort>.config
 ref=/project/${Project}/Reference/<ref>.fasta
 known=/project/${Project}/Reference/<refvcf>.vcf.gz
 
-#### DON'T EDIT BELOW THIS LINE ####
-
 module load gatk/4.1.9.0
 
 sample=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
