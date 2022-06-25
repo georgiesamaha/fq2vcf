@@ -20,8 +20,6 @@ module load singularity/3.7.0
 config=/project/Munchkins/Scripts/Configs/Munchkins.config #where is your config file
 bams=/scratch/Munchkins/Bams # have to bind mount for Singularity, cannot read /scratch or /project
 
-#### DON'T EDIT BELOW THIS LINE ####
-
 NCPUS=16
 sample=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
 bam=${bams}/${sample}.final.bam
