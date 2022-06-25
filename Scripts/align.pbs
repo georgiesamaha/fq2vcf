@@ -22,8 +22,6 @@ Project=
 config=/project/${Project}/Scripts/Configs/<cofig_name_here>.config
 ref=/project/${Project}/Reference/<ref>.fasta # fasta format 
 
-#### DON'T EDIT BELOW THIS LINE ####
-
 module load samtools/1.10
 module load bwa/0.7.17
 module load gatk/4.2.1.0
