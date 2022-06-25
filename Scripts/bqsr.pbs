@@ -22,8 +22,6 @@ config=/project/${Project}/Scripts/Configs/Munchkins.config
 ref=/project/${Project}/Reference/felCat9.0.fasta
 known=/project/${Project}/Reference/felis_catus.vcf.gz
 
-#### DON'T EDIT BELOW THIS LINE ####
-
 module load gatk/4.1.9.0
 module load samtools/1.10
 
