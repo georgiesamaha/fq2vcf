@@ -22,13 +22,10 @@ config=/project/${Project}/Scripts/Configs/<cohort>.config
 ref=/project/${Project}/Reference/<ref>.fasta
 known=/project/${Project}/Reference/<refvcf>.vcf.gz
 
-
 VCFs=/scratch/${Project}/VCFs
 sample1=${VCFs}/FC300
 sample2=${VCFs}/FC327
 sample3=${VCFs}/USFC318
-
-#### DON'T EDIT BELOW THIS LINE ####
 
 sample=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
 gvcf=${VCFs}/${cohort}.g.vcf.gz
