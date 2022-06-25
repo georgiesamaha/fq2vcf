@@ -21,8 +21,6 @@ Project=
 io=/scratch/${Project}/Fastq
 config=/project/${Project}/Scripts/Configs/fastqc.config #list of fastq files
 
-#### DON'T EDIT BELOW THIS LINE ####
-
 fastq=$(awk -v taskID=$PBS_ARRAY_INDEX '$1==taskID {print $2}' $config)
 sample=`echo ${fastq} | cut -d '_' -f 1`
 fq=${io}/${fastq}
