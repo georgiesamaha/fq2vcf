@@ -70,15 +70,15 @@ bwa mem -M -t $NCPUS $ref \
 done
 
 # sort bams by coordinates
-samtools view -@ 12 -h ${bams}/${sample}.dedup.bam \
-        | samtools sort -@ ${NCPUS} -T ${bams}/temp -m 4G -o ${bams}/${sample}.dedup.sorted.bam -
+samtools view -@ 12 -h ${bams}/${fqpair}.dedup.bam \
+        | samtools sort -@ ${NCPUS} -T ${bams}/temp -m 4G -o ${bams}/${fqpair}.dedup.sorted.bam -
 
 # Error check with samtools
-if ! samtools quickcheck ${bams}/${sample}.dedup.sorted.bam
+if ! samtools quickcheck ${bams}/${fqpair}.dedup.sorted.bam
         then
-        printf "corrupted or missing ${bams}/${sample}.dedup.sorted.bam"
+        printf "corrupted or missing ${bams}/${fqpair}.dedup.sorted.bam"
 
 fi
 
 # Index with samtools
-samtools index -b ${bams}/${sample}.dedup.sorted.bam ${bams}/${sample}.dedup.sorted.bai
+samtools index -b ${bams}/${fqpair}.dedup.sorted.bam ${bams}/${fqpair}.dedup.sorted.bai
