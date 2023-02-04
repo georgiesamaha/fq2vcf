@@ -71,15 +71,17 @@ bash prepmultiqc.sh
 
 The config file must have one row per unique sample, matching the format:
 
-|ArrayID|SampleID|Breed |Platform|SeqCentre |
-|-------|--------|------|--------|----------|
-|1      |Sample1 |Breed1|Illumina|Ramaciotti|
-|2      |Sample2 |Breed1|Illumina|Ramaciotti|
+|ArrayID|SampleID|Breed |Platform|SeqCentre |FQ1 |FQ2 |
+|-------|--------|------|--------|----------|----|----|
+|1      |Sample1 |Breed1|Illumina|Ramaciotti|/PATH/TO/FQ_R1.GZ | /PATH/TO/FQ_R2.GZ|
+|2      |Sample2 |Breed1|Illumina|Ramaciotti|/PATH/TO/FQ_R1.GZ | /PATH/TO/FQ_R2.GZ|
 
    - ArrayID: job number for PBS job scheduler. Sample 1 will be run as 
    - SampleID: the unique identifier enabling one to recognise which FASTQs belong to the same sample.
    - Platform: type of sequencing platform 
    - SeqCentre: where the samples were sequenced, this will be stored in the final BAM files
+   - Fq1: full path of the corresponding R1 fastq file 
+   - Fq2: full path of the corresponding R2 fastq file 
 
 Save the config file to the /project/<Project>/Scripts/Configs directory. It will be used to run a single job array for each sample, where applicable to run script parallel by sample.  
 
